@@ -1,0 +1,43 @@
+# name: GitHub Actions Demo
+# run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+# on: [push]
+# jobs:
+#   Explore-GitHub-Actions:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Use secret
+#         run: |
+#           echo "${{ secrets.API_UPDATE_SECRET }}" > .env
+#           cat .env
+#           echo "🍏 This job's status is ${{ job.status }}."
+
+name: Trigger on PR Comment
+description: Trigger PR Test called from PR workflow
+runs: 
+  using: composite
+  steps:
+    - name: Print success
+      shell: bash
+      run: echo "✅ Keyword /run-tests matched! Running job.. ********."
+
+    - name: Print commenter
+      shell: bash
+      run: echo "Comment made by - $GITHUB_ACTOR"
+
+    - name: Print repo
+      shell: bash
+      run: echo "Repo - $GITHUB_REPOSITORY"
+
+    - name: Get PR branch name
+      id: get_branch
+      shell: bash
+      run: |
+        PR_NUMBER=${{ github.event.issue.number }}
+        BRANCH=$(curl -s -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
+          https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER \
+          | jq -r .head.ref)
+        echo "branch_name=$BRANCH" >> $GITHUB_OUTPUT
+
+    - name: Use branch name
+      shell: bash
+      run: echo "Source branch is ${{ steps.get_branch.outputs.branch_name }}"
