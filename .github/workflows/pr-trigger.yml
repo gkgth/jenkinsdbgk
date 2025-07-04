@@ -1,0 +1,39 @@
+
+name: PR Comment via dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      myInput:
+        description: 'Example input'
+        required: true
+        default: 10
+
+jobs:
+  pr-trigger:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}  # or use a PAT if needed
+    steps:
+
+      - name: Print commenter
+        run: echo "Comment made by - $GITHUB_ACTOR"
+
+      - name: Print repo
+        run: echo "Repo - $GITHUB_REPOSITORY"
+
+      - name: Get PR branch name
+        id: get_branch
+        run: |
+          echo "Received PR: ${{ github.event.inputs.myInput }}"
+          PR_NUMBER=${{ github.event.inputs.myInput }}
+          echo "${PR_NUMBER}"
+          BRANCH=$(curl -s -H "Authorization: token ${GH_TOKEN}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER} \
+            | jq -r .head.ref)
+          echo "branch_name=$BRANCH" >> $GITHUB_OUTPUT
+          echo "variable from root job $gk_newvar"
+          echo "variable from root job ${{ steps.parentjobid.outputs.gk_newvar }}"
+
+      - name: Use branch name
+        run: echo "Source branch is ${{ steps.get_branch.outputs.branch_name }}"
