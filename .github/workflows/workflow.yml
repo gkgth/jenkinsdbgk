@@ -28,6 +28,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}  # or use a PAT if needed
         run: |
+          echo "pr comment ${{ github.event.comment.body }}"
           echo "${{ github.repository }}"
           PR_NUMBER="${{ github.event.issue.number }}"
           echo "gk_newvar=ThisOriginalVar" >> $GITHUB_OUTPUT
